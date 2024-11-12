@@ -34,7 +34,6 @@ public class FaceSampleService {
 
     @PostConstruct
     public void init() {
-        log.info("accessKey:{}, secretKey:{}, region:{}", accessKey, secretKey, region);
 
         AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
         this.rekognitionClient = RekognitionClient.builder()
