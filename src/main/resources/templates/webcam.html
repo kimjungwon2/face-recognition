@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>웹캠 스트리밍 & 캡처</title>
+    <meta charset="UTF-8">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .video-container {
+            margin-bottom: 20px;
+            position: relative;
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        #videoElement {
+            width: 100%;
+            max-width: 640px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        #captureButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #captureButton:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        #captureButton:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #status {
+            margin-top: 10px;
+            color: #666;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        #status.error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+
+        #status.success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+
+        #capturedImage {
+            max-width: 320px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .error-container {
+            display: none;
+            padding: 20px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>웹캠 스트리밍 & 캡처</h1>
+
+    <div class="error-container" id="errorContainer">
+        <h3>웹캠 접근 오류</h3>
+        <p id="errorMessage"></p>
+    </div>
+
+    <div class="video-container">
+        <video id="videoElement" autoplay playsinline></video>
+    </div>
+
+    <button id="captureButton" disabled>캡처</button>
+    <button id="retryButton" style="display: none" onclick="retryWebcam()">다시 시도</button>
+    <p id="status"></p>
+
+    <img id="capturedImage" alt="캡처된 이미지">
+</div>
+
+<script th:inline="javascript">
+    let videoElement = document.getElementById('videoElement');
+    let captureButton = document.getElementById('captureButton');
+    let statusElement = document.getElementById('status');
+    let capturedImage = document.getElementById('capturedImage');
+    let errorContainer = document.getElementById('errorContainer');
+    let errorMessage = document.getElementById('errorMessage');
+    let retryButton = document.getElementById('retryButton');
+    let stream = null;
+
+    // 브라우저 호환성 체크
+    function checkBrowserCompatibility() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('이 브라우저는 웹캠을 지원하지 않습니다. 최신 브라우저를 사용해주세요.');
+        }
+    }
+
+    // 웹캠 디바이스 체크
+    async function checkWebcamDevices() {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        if (videoDevices.length === 0) {
+            throw new Error('연결된 웹캠을 찾을 수 없습니다.');
+        }
+        return videoDevices;
+    }
+
+    // 웹캠 스트리밍 시작
+    async function startWebcam() {
+        try {
+            // 브라우저 호환성 체크
+            checkBrowserCompatibility();
+
+            // HTTPS 체크
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                throw new Error('웹캠 접근을 위해 HTTPS 연결이 필요합니다.');
+            }
+
+            // 웹캠 디바이스 체크
+            await checkWebcamDevices();
+
+            // 권한 체크
+            const permission = await navigator.permissions.query({ name: 'camera' });
+            if (permission.state === 'denied') {
+                throw new Error('카메라 접근이 차단되었습니다. 브라우저 설정에서 권한을 허용해주세요.');
+            }
+
+            // 스트림 시작
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
+                }
+            });
+
+            videoElement.srcObject = stream;
+            captureButton.disabled = false;
+            updateStatus('웹캠 준비 완료', 'success');
+            errorContainer.style.display = 'none';
+            retryButton.style.display = 'none';
+
+        } catch (err) {
+            handleWebcamError(err);
+        }
+    }
+
+    // 에러 처리
+    function handleWebcamError(error) {
+        let message = '웹캠 접근 실패: ';
+
+        switch(error.name) {
+            case 'NotFoundError':
+                message += '웹캠을 찾을 수 없습니다.';
+                break;
+            case 'NotAllowedError':
+                message += '웹캠 접근 권한이 거부되었습니다.';
+                break;
+            case 'NotReadableError':
+                message += '웹캠이 이미 다른 프로그램에서 사용 중입니다.';
+                break;
+            case 'OverconstrainedError':
+                message += '웹캠이 요청된 해상도를 지원하지 않습니다.';
+                break;
+            default:
+                message += error.message;
+        }
+
+        updateStatus(message, 'error');
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = message;
+        retryButton.style.display = 'inline-block';
+        captureButton.disabled = true;
+    }
+
+    // 상태 업데이트
+    function updateStatus(message, type = '') {
+        statusElement.textContent = message;
+        statusElement.className = type ? type : '';
+    }
+
+    // 웹캠 재시도
+    function retryWebcam() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        startWebcam();
+    }
+
+    // 캡처 기능
+    captureButton.addEventListener('click', function() {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0);
+
+            const imageData = canvas.toDataURL('image/png');
+
+            fetch('/webcam/capture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'image=' + encodeURIComponent(imageData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('서버 응답 오류: ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(filename => {
+                    updateStatus('캡처 성공: ' + filename, 'success');
+                    capturedImage.src = imageData;
+                    capturedImage.style.display = 'block';
+                })
+                .catch(error => {
+                    updateStatus('캡처 실패: ' + error.message, 'error');
+                    console.error('캡처 에러:', error);
+                });
+        } catch (error) {
+            updateStatus('캡처 처리 중 오류 발생: ' + error.message, 'error');
+        }
+    });
+
+    // 페이지 로드 시 웹캠 시작
+    document.addEventListener('DOMContentLoaded', startWebcam);
+
+    // 페이지 언로드 시 웹캠 정리
+    window.addEventListener('beforeunload', function() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,5 +1,11 @@
 spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
   application:
     name: face
   profiles:
     include: aws
+
+capture:
+  save:
+    path: ./src/main/resources/captures
