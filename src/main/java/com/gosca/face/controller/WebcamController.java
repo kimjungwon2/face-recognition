@@ -1,6 +1,6 @@
 package com.gosca.face.controller;
 
-import com.gosca.face.service.WebcamService;
+import com.gosca.face.service.webcam.WebcamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

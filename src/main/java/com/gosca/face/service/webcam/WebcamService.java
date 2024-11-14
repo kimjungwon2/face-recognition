@@ -1,4 +1,4 @@
-package com.gosca.face.service;
+package com.gosca.face.service.webcam;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

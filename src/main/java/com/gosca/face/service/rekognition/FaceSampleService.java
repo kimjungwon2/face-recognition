@@ -1,4 +1,4 @@
-package com.gosca.face.service;
+package com.gosca.face.service.rekognition;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
