@@ -8,4 +8,4 @@ spring:
 
 capture:
   save:
-    path: ./src/main/resources/captures
+    path: /home/ec2-user/captures

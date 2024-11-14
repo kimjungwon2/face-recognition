@@ -141,7 +141,7 @@
             checkBrowserCompatibility();
 
             // HTTPS 체크
-            if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== 'face.gosca-1.co.kr') {
                 throw new Error('웹캠 접근을 위해 HTTPS 연결이 필요합니다.');
             }
 
