@@ -141,17 +141,21 @@
             checkBrowserCompatibility();
 
             // HTTPS 체크
-            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== 'face.gosca-1.co.kr') {
+            if (location.protocol !== 'https:' &&
+                location.hostname !== 'localhost' &&
+                location.hostname !== 'face.gosca-1.co.kr') {
                 throw new Error('웹캠 접근을 위해 HTTPS 연결이 필요합니다.');
             }
 
             // 웹캠 디바이스 체크
             await checkWebcamDevices();
 
-            // 권한 체크
-            const permission = await navigator.permissions.query({ name: 'camera' });
-            if (permission.state === 'denied') {
-                throw new Error('카메라 접근이 차단되었습니다. 브라우저 설정에서 권한을 허용해주세요.');
+            // 권한 체크 수정
+            if (navigator.permissions && navigator.permissions.query) {
+                const permission = await navigator.permissions.query({ name: 'camera' });
+                if (permission.state === 'denied') {
+                    throw new Error('카메라 접근이 차단되었습니다. 브라우저 설정에서 권한을 허용해주세요.');
+                }
             }
 
             // 스트림 시작
