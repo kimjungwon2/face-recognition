@@ -20,4 +20,9 @@ class CollectionUserServiceTest {
         collectionUserService.getUserLists("GOSCA_TEST");
     }
 
+    @Test
+    void associcateUser(){
+        collectionUserService.associateFace("GOSCA_TEST", "f05a32be-13d8-470c-8cb7-f129c68cd987","GOSCA_2");
+    }
+
 }

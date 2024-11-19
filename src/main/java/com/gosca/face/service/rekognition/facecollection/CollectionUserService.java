@@ -1,10 +1,5 @@
 package com.gosca.face.service.rekognition.facecollection;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.rekognition.model.ListUsersRequest;
-import com.amazonaws.services.rekognition.model.ListUsersResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,11 +7,19 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.rekognition.AmazonRekognition;
 import com.amazonaws.services.rekognition.AmazonRekognitionClientBuilder;
 import com.amazonaws.services.rekognition.model.CreateUserRequest;
-
 import com.amazonaws.services.rekognition.model.User;
+import com.amazonaws.services.rekognition.model.AssociateFacesRequest;
+import com.amazonaws.services.rekognition.model.AssociateFacesResult;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.rekognition.model.ListUsersRequest;
+import com.amazonaws.services.rekognition.model.ListUsersResult;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
 import java.util.List;
+
 
 
 @Slf4j
@@ -70,6 +73,22 @@ public class CollectionUserService {
                 System.out.println(currentUser.getUserId() + " : " + currentUser.getUserStatus());
             }
         } while (listUsersResult.getNextToken() != null);
+    }
+
+    public void associateFace(String collectionId, String faceId, String userId){
+
+        System.out.println("Associating faces to the existing user: " + userId);
+        List<String> faceIds = Arrays.asList(faceId);
+
+        AssociateFacesRequest request = new AssociateFacesRequest()
+                .withCollectionId(collectionId)
+                .withUserId(userId)
+                .withFaceIds(faceIds);
+
+        AssociateFacesResult result = rekognitionClient.associateFaces(request);
+
+        System.out.println("Successful face associations: " + result.getAssociatedFaces().size());
+        System.out.println("Unsuccessful face associations: " + result.getUnsuccessfulFaceAssociations().size());
     }
 
 }
