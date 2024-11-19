@@ -91,4 +91,6 @@ public class CollectionUserService {
         System.out.println("Unsuccessful face associations: " + result.getUnsuccessfulFaceAssociations().size());
     }
 
+
+
 }

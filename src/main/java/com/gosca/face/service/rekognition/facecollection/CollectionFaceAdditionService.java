@@ -9,15 +9,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
-import software.amazon.awssdk.services.rekognition.model.IndexFacesResponse;
-import software.amazon.awssdk.services.rekognition.model.IndexFacesRequest;
-import software.amazon.awssdk.services.rekognition.model.Image;
-import software.amazon.awssdk.services.rekognition.model.QualityFilter;
-import software.amazon.awssdk.services.rekognition.model.Attribute;
-import software.amazon.awssdk.services.rekognition.model.FaceRecord;
-import software.amazon.awssdk.services.rekognition.model.UnindexedFace;
-import software.amazon.awssdk.services.rekognition.model.RekognitionException;
-import software.amazon.awssdk.services.rekognition.model.Reason;
+import software.amazon.awssdk.services.rekognition.model.*;
 
 import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
@@ -48,7 +40,7 @@ public class CollectionFaceAdditionService {
     }
 
 
-    public void addToCollection(String collectionId, String sourceImage) {
+    public void addToCollection(RekognitionClient rekognitionClient, String collectionId, String sourceImage) {
 
         try {
             InputStream sourceStream = new FileInputStream(sourceImage);
@@ -85,6 +77,26 @@ public class CollectionFaceAdditionService {
             }
 
         } catch (RekognitionException | FileNotFoundException e) {
+            log.info(e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    public void listFacesCollection(RekognitionClient rekognitionClient, String collectionId) {
+        try {
+            ListFacesRequest facesRequest = ListFacesRequest.builder()
+                    .collectionId(collectionId)
+                    .maxResults(10)
+                    .build();
+
+            ListFacesResponse facesResponse = rekognitionClient.listFaces(facesRequest);
+            List<Face> faces = facesResponse.faces();
+            for (Face face: faces) {
+                log.info("Confidence level there is a face: {}",face.confidence());
+                log.info("The face Id value is {}",face.faceId());
+            }
+
+        } catch (RekognitionException e) {
             log.info(e.getMessage());
             System.exit(1);
         }
