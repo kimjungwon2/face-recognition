@@ -5,16 +5,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CollectionCreatorServiceTest {
+class CollectionUserServiceTest {
 
     @Autowired
-    CollectionCreatorService collectionCreatorService;
+    CollectionUserService collectionUserService;
 
     @Test
-    void createMyCollection() {
-        String collectionId = "GOSCA_TEST";
-
-        collectionCreatorService.createMyCollection(collectionId);
-
+    void test(){
+        collectionUserService.createUser("GOSCA_TEST","GOSCA_3");
     }
+
+    @Test
+    void getUserLists(){
+        collectionUserService.getUserLists("GOSCA_TEST");
+    }
+
 }

@@ -28,8 +28,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'com.amazonaws:aws-java-sdk-rekognition:1.12.621'
     compileOnly 'org.projectlombok:lombok'
     implementation 'software.amazon.awssdk:rekognition:2.20.17'
+    implementation 'com.amazonaws:aws-java-sdk-rekognition:1.12.541'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
 
