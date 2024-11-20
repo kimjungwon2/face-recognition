@@ -39,17 +39,17 @@ class CollectionUserServiceTest {
 
     @Test
     void test(){
-        collectionUserService.createUser(rekognitionClient,"GOSCA_TEST","GOSCA_3");
+        collectionUserService.createUser(rekognitionClient,"GOSCA_TEST10","1");
     }
 
     @Test
     void getUserLists(){
-        collectionUserService.getUserLists(rekognitionClient,"GOSCA_TEST");
+        collectionUserService.getUserLists(rekognitionClient,"GOSCA_TEST10");
     }
 
     @Test
     void associcateUser(){
-        collectionUserService.associateFace(rekognitionClient,"GOSCA_TEST", "f05a32be-13d8-470c-8cb7-f129c68cd987","GOSCA_2");
+        collectionUserService.associateFace(rekognitionClient,"GOSCA_TEST10", "8964a214-0950-4f60-a2cd-c78be4a09509","user1");
     }
 
 }

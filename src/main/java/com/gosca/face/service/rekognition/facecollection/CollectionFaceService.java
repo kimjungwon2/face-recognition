@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class CollectionFaceService {
 
-    public String addToCollection(RekognitionClient rekognitionClient, String collectionId, MultipartFile sourceImage) {
+    public String addFaceToCollection(RekognitionClient rekognitionClient, String collectionId, MultipartFile sourceImage) {
         try(InputStream sourceStream = sourceImage.getInputStream()) {
             SdkBytes sourceBytes = SdkBytes.fromInputStream(sourceStream);
 
@@ -73,7 +73,7 @@ public class CollectionFaceService {
     }
 
 
-    public void addToCollection(RekognitionClient rekognitionClient, String collectionId, String sourceImage) {
+    public void addFaceToCollection(RekognitionClient rekognitionClient, String collectionId, String sourceImage) {
 
         try {
             InputStream sourceStream = new FileInputStream(sourceImage);

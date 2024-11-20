@@ -60,12 +60,12 @@ public class FaceImageSaveService {
     }
 
 
-    public boolean saveUserFace(String collectionId, MultipartFile file){
+    public boolean saveUserFace(MultipartFile file, String collectionId, String userId){
         collectionManagementService.createMyCollection(rekognitionClientV2, collectionId);
-        String faceId = collectionFaceService.addToCollection(rekognitionClientV2, collectionId, file);
+        String faceId = collectionFaceService.addFaceToCollection(rekognitionClientV2, collectionId, file);
 
-        collectionUserService.createUser(rekognitionClientV1,collectionId,"user1");
-        collectionUserService.associateFace(rekognitionClientV1, collectionId, faceId,"1");
+        collectionUserService.createUser(rekognitionClientV1, collectionId, userId);
+        collectionUserService.associateFace(rekognitionClientV1, collectionId, faceId, userId);
 
         s3Service.uploadFileToS3(file);
 

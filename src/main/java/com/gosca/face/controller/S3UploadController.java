@@ -31,9 +31,10 @@ public class S3UploadController {
 
             log.info("파일 업로드 시작: {}", file.getOriginalFilename());
 
-            String collectionId="GOSCA_TEST10";
+            String collectionId="GOSCA_TEST11";
+            String userId = "1";
 
-            faceImageSaveService.saveUserFace(collectionId, file);
+            faceImageSaveService.saveUserFace(file, collectionId, userId);
 
             return ResponseEntity.ok("저장 완료");
 

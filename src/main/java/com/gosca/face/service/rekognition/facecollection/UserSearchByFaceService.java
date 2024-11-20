@@ -19,14 +19,14 @@ import java.nio.channels.FileChannel;
 @Service
 public class UserSearchByFaceService {
 
-    public void searchUser(AmazonRekognition rekognitionClient, String sourceImage, String collectionId) {
+    public String searchUser(AmazonRekognition rekognitionClient, String sourceImage, String collectionId) {
         Image image = createImageFromFile(sourceImage);
 
         SearchUsersByImageRequest request = new SearchUsersByImageRequest()
                 .withCollectionId(collectionId)
                 .withImage(image)
                 .withUserMatchThreshold(80F)
-                .withMaxUsers(2);
+                .withMaxUsers(1);
 
         SearchUsersByImageResult result =
                 rekognitionClient.searchUsersByImage(request);
@@ -35,6 +35,8 @@ public class UserSearchByFaceService {
         for (UserMatch match: result.getUserMatches()) {
             System.out.println(match.getUser().getUserId() + " with similarity score " + match.getSimilarity());
         }
+
+        return result.getUserMatches().get(0).getUser().getUserId();
     }
 
     private Image createImageFromFile(String filePath) {

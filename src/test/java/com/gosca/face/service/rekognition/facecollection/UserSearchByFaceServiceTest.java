@@ -40,8 +40,8 @@ class UserSearchByFaceServiceTest {
 
     @Test
     void searchUser() {
-        String collectionId = "GOSCA_TEST";
-        String sourceImage = "C:\\Users\\gram\\Desktop\\face\\src\\main\\resources\\유재석.jpg";
+        String collectionId = "GOSCA_TEST11";
+        String sourceImage = "C:\\Users\\gram\\Desktop\\face\\src\\main\\resources\\김정원.jpg";
 
         userSearchByFaceService.searchUser(rekognitionClient, sourceImage,collectionId);
     }

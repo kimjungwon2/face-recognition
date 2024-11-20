@@ -43,4 +43,9 @@ class CollectionManagementServiceTest {
         collectionManagementService.createMyCollection(rekognitionClient, collectionId);
 
     }
+
+    @Test
+    void deleteMyCollection(){
+        collectionManagementService.deleteMyCollection(rekognitionClient, "GOSCA_TEST12");
+    }
 }

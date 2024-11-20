@@ -37,9 +37,9 @@ class CollectionFaceServiceTest {
 
     @Test
     void test(){
-        String sourceImage = "C:\\Users\\gram\\Desktop\\face\\src\\main\\resources\\김승수.jpg";
+        String sourceImage = "C:\\Users\\gram\\Desktop\\face\\src\\main\\resources\\김정원.jpg";
 
-        collectionFaceService.addToCollection(rekognitionClient,"GOSCA_TEST",sourceImage);
+        collectionFaceService.addFaceToCollection(rekognitionClient,"GOSCA_TEST11",sourceImage);
     }
 
     @Test
