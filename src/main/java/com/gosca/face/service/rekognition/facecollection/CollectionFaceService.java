@@ -116,7 +116,7 @@ public class CollectionFaceService {
 
         } catch (RekognitionException | FileNotFoundException e) {
             log.info(e.getMessage());
-            System.exit(1);
+            throw new IllegalStateException("컬렉션 얼굴 추가 오류");
         }
     }
 
@@ -136,7 +136,7 @@ public class CollectionFaceService {
 
         } catch (RekognitionException e) {
             log.info(e.getMessage());
-            System.exit(1);
+            throw new IllegalStateException("컬렉션 얼굴 조회 오류");
         }
     }
 
@@ -167,7 +167,7 @@ public class CollectionFaceService {
 
         } catch (RekognitionException | FileNotFoundException e) {
             System.out.println(e.getMessage());
-            System.exit(1);
+            throw new IllegalStateException("컬렉션 얼굴 인식 오류");
         }
     }
 

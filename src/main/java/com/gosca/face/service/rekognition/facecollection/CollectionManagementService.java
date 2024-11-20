@@ -24,7 +24,7 @@ public class CollectionManagementService {
 
         } catch(RekognitionException e) {
             log.info(e.getMessage());
-            System.exit(1);
+            throw new IllegalStateException("컬렉션 생성 오류");
         }
     }
 
@@ -39,7 +39,7 @@ public class CollectionManagementService {
 
         } catch(RekognitionException e) {
             log.info(e.getMessage());
-            System.exit(1);
+            throw new IllegalStateException("Collection 삭제 오류");
         }
     }
 
@@ -57,7 +57,7 @@ public class CollectionManagementService {
 
         } catch(RekognitionException e) {
             log.info(e.getMessage());
-            System.exit(1);
+            throw new IllegalStateException("컬렉션 설명 오류");
         }
     }
 
@@ -75,7 +75,7 @@ public class CollectionManagementService {
 
         } catch (RekognitionException e) {
             log.info(e.getMessage());
-            System.exit(1);
+            throw new IllegalStateException("Collection 조회 오류");
         }
     }
 
