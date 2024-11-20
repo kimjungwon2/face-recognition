@@ -54,6 +54,8 @@ public class CollectionUserService {
         System.out.println("Associating faces to the existing user: " + userId);
         List<String> faceIds = Arrays.asList(faceId);
 
+        userId = "gosca_2";
+
         AssociateFacesRequest request = new AssociateFacesRequest()
                 .withCollectionId(collectionId)
                 .withUserId(userId)

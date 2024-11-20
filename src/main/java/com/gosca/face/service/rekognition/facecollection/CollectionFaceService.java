@@ -3,19 +3,74 @@ package com.gosca.face.service.rekognition.facecollection;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 
 @Slf4j
 @Service
 public class CollectionFaceService {
+
+    public String addToCollection(RekognitionClient rekognitionClient, String collectionId, MultipartFile sourceImage) {
+        try(InputStream sourceStream = sourceImage.getInputStream()) {
+            SdkBytes sourceBytes = SdkBytes.fromInputStream(sourceStream);
+
+            Image souImage = Image.builder()
+                    .bytes(sourceBytes)
+                    .build();
+
+            IndexFacesRequest facesRequest = IndexFacesRequest.builder()
+                    .collectionId(collectionId)
+                    .image(souImage)
+                    .maxFaces(1)
+                    .qualityFilter(QualityFilter.AUTO)
+                    .detectionAttributes(Attribute.DEFAULT)
+                    .build();
+
+            IndexFacesResponse facesResponse = rekognitionClient.indexFaces(facesRequest);
+            log.info("Results for the image");
+            log.info("\n Faces indexed:");
+
+            if(facesResponse != null && facesResponse.faceRecords().size() == 0) {
+                throw new IllegalStateException("얼굴이 인식되지 않았습니다.");
+            }
+
+            if(facesResponse != null && facesResponse.faceRecords().size() >= 2) {
+                throw new IllegalStateException("얼굴이 두 개 인식됐습니다.");
+            }
+
+
+            List<FaceRecord> faceRecords = facesResponse.faceRecords();
+            for (FaceRecord faceRecord : faceRecords) {
+                log.info("  Face ID: {}", faceRecord.face().faceId());
+                log.info("  Location: {}", faceRecord.faceDetail().boundingBox().toString());
+            }
+
+            List<UnindexedFace> unindexedFaces = facesResponse.unindexedFaces();
+
+            for (UnindexedFace unindexedFace : unindexedFaces) {
+                log.info("Faces not indexed:");
+                log.info("  Location: {}", unindexedFace.faceDetail().boundingBox().toString());
+
+                for (Reason reason : unindexedFace.reasons()) {
+                    log.info("Reason: {}", reason);
+                }
+            }
+
+            return faceRecords.get(0).face().faceId();
+
+        } catch (RekognitionException e) {
+            log.error("Rekognition error: ", e);
+            throw new RuntimeException("Rekognition 처리 중 오류가 발생했습니다.", e);
+        } catch (IOException e) {
+            log.error("File processing error: ", e);
+            throw new RuntimeException("파일 처리 중 오류가 발생했습니다.", e);
+        }
+    }
 
 
     public void addToCollection(RekognitionClient rekognitionClient, String collectionId, String sourceImage) {

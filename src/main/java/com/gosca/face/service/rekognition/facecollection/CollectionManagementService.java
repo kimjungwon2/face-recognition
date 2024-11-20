@@ -22,7 +22,6 @@ public class CollectionManagementService {
             log.info("CollectionArn: {}", collectionResponse.collectionArn());
             log.info("Status code: {}", collectionResponse.statusCode().toString());
 
-            rekognitionClient.close();
         } catch(RekognitionException e) {
             log.info(e.getMessage());
             System.exit(1);

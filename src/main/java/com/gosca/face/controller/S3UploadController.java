@@ -1,5 +1,6 @@
 package com.gosca.face.controller;
 
+import com.gosca.face.service.picture.FaceImageSaveService;
 import com.gosca.face.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/files")
 public class S3UploadController {
 
-    private final S3Service fileUploadService;
-
+    private final FaceImageSaveService faceImageSaveService;
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
@@ -30,10 +30,12 @@ public class S3UploadController {
             }
 
             log.info("파일 업로드 시작: {}", file.getOriginalFilename());
-            String result = fileUploadService.uploadFileToS3(file);
-            log.info("파일 업로드 완료: {}", result);
 
-            return ResponseEntity.ok(result);
+            String collectionId="GOSCA_TEST10";
+
+            faceImageSaveService.saveUserFace(collectionId, file);
+
+            return ResponseEntity.ok("저장 완료");
 
         } catch (Exception e) {
             log.error("파일 업로드 실패", e);
