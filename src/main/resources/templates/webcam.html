@@ -97,7 +97,7 @@
     </div>
 
     <div class="video-container">
-        <video id="videoElement" autoplay playsinline></video>
+        <video id="videoElement" autoplay playsinline muted></video>
     </div>
 
     <button id="captureButton" disabled>캡처</button>
@@ -137,43 +137,54 @@
     // 웹캠 스트리밍 시작
     async function startWebcam() {
         try {
-            // 브라우저 호환성 체크
             checkBrowserCompatibility();
 
-            // HTTPS 체크
-            if (location.protocol !== 'https:' &&
-                location.hostname !== 'localhost' &&
-                location.hostname !== 'face.gosca-1.co.kr') {
-                throw new Error('웹캠 접근을 위해 HTTPS 연결이 필요합니다.');
-            }
+            // 모바일 여부 체크
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-            // 웹캠 디바이스 체크
-            await checkWebcamDevices();
-
-            // 권한 체크 수정
-            if (navigator.permissions && navigator.permissions.query) {
-                const permission = await navigator.permissions.query({ name: 'camera' });
-                if (permission.state === 'denied') {
-                    throw new Error('카메라 접근이 차단되었습니다. 브라우저 설정에서 권한을 허용해주세요.');
-                }
-            }
-
-            // 스트림 시작
-            stream = await navigator.mediaDevices.getUserMedia({
+            const constraints = {
                 video: {
+                    facingMode: isMobile ? "environment" : "user", // 모바일이면 후면카메라, 아니면 전면카메라
                     width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                    facingMode: 'user'
+                    height: { ideal: 720 }
                 }
-            });
+            };
+
+            console.log('카메라 시작...');
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            console.log('카메라 스트림 획득:', stream);
+
+            // 스트림 정보 확인
+            const videoTrack = stream.getVideoTracks()[0];
+            console.log('비디오 트랙 설정:', videoTrack.getSettings());
 
             videoElement.srcObject = stream;
-            captureButton.disabled = false;
-            updateStatus('웹캠 준비 완료', 'success');
-            errorContainer.style.display = 'none';
-            retryButton.style.display = 'none';
+            videoElement.setAttribute('playsinline', true); // iOS 필수
+
+            // 비디오 이벤트 리스너 추가
+            videoElement.onloadedmetadata = () => {
+                console.log('비디오 메타데이터 로드됨');
+                videoElement.play()
+                    .then(() => {
+                        console.log('비디오 재생 시작');
+                        captureButton.disabled = false;
+                        updateStatus('웹캠 준비 완료', 'success');
+                        errorContainer.style.display = 'none';
+                        retryButton.style.display = 'none';
+                    })
+                    .catch(err => {
+                        console.error('비디오 재생 실패:', err);
+                        handleWebcamError(err);
+                    });
+            };
+
+            videoElement.onerror = (err) => {
+                console.error('비디오 요소 에러:', err);
+                handleWebcamError(err);
+            };
 
         } catch (err) {
+            console.error('웹캠 초기화 에러:', err);
             handleWebcamError(err);
         }
     }
@@ -222,68 +233,53 @@
 
     captureButton.addEventListener('click', function() {
         try {
+            console.log('캡처 시작...');
             const canvas = document.createElement('canvas');
-            // 원본 비율 유지하면서 크기 조정
-            const MAX_WIDTH = 640;
-            const MAX_HEIGHT = 480;
-            let width = videoElement.videoWidth;
-            let height = videoElement.videoHeight;
 
-            // 비율 계산
-            if (width > height) {
-                if (width > MAX_WIDTH) {
-                    height *= MAX_WIDTH / width;
-                    width = MAX_WIDTH;
-                }
-            } else {
-                if (height > MAX_HEIGHT) {
-                    width *= MAX_HEIGHT / height;
-                    height = MAX_HEIGHT;
-                }
-            }
+            // 비디오 현재 크기 가져오기
+            const videoWidth = videoElement.videoWidth || videoElement.clientWidth;
+            const videoHeight = videoElement.videoHeight || videoElement.clientHeight;
 
-            // 크기 조정된 캔버스 설정
-            canvas.width = width;
-            canvas.height = height;
+            console.log('비디오 크기:', videoWidth, 'x', videoHeight);
 
-            // 이미지 품질 향상을 위한 설정
-            const ctx = canvas.getContext('2d', { alpha: false });
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
+            // 캔버스 크기 설정
+            canvas.width = videoWidth;
+            canvas.height = videoHeight;
 
-            // 캔버스에 그리기
-            ctx.drawImage(videoElement, 0, 0, width, height);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-            // 이미지 압축 (JPEG 형식 사용, 품질 0.7)
-            const imageData = canvas.toDataURL('image/jpeg', 0.7);
+            // 이미지 데이터를 Blob으로 변환
+            canvas.toBlob((blob) => {
+                console.log('이미지 블롭 생성:', blob.size, 'bytes');
 
-            // 용량 확인 (디버깅용)
-            const imageSize = Math.round(imageData.length * 3/4);  // base64 크기를 바이트로 변환
-            console.log('압축된 이미지 크기:', Math.round(imageSize/1024), 'KB');
+                const formData = new FormData();
+                formData.append('file', blob, 'capture.jpg');
 
-            fetch('/webcam/capture', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'image=' + encodeURIComponent(imageData)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('서버 응답 오류: ' + response.status);
-                    }
-                    return response.text();
+                fetch('/api/files/upload', {  // S3 업로드 엔드포인트로 변경
+                    method: 'POST',
+                    body: formData
                 })
-                .then(filename => {
-                    updateStatus('캡처 성공: ' + filename, 'success');
-                    capturedImage.src = imageData;
-                    capturedImage.style.display = 'block';
-                })
-                .catch(error => {
-                    updateStatus('캡처 실패: ' + error.message, 'error');
-                    console.error('캡처 에러:', error);
-                });
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('서버 응답 오류: ' + response.status);
+                        }
+                        return response.text();
+                    })
+                    .then(result => {
+                        console.log('업로드 성공:', result);
+                        updateStatus('캡처 성공: ' + result, 'success');
+                        capturedImage.src = URL.createObjectURL(blob);
+                        capturedImage.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('업로드 실패:', error);
+                        updateStatus('캡처 실패: ' + error.message, 'error');
+                    });
+            }, 'image/jpeg', 0.8);
+
         } catch (error) {
+            console.error('캡처 에러:', error);
             updateStatus('캡처 처리 중 오류 발생: ' + error.message, 'error');
         }
     });
