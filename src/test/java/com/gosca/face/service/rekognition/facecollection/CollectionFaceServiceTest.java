@@ -12,11 +12,10 @@ import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import javax.annotation.PostConstruct;
 
 @SpringBootTest
-class CollectionFaceSearchServiceTest {
+class CollectionFaceServiceTest {
 
     @Autowired
-    CollectionFaceSearchService collectionFaceSearchService;
-
+    CollectionFaceService collectionFaceService;
     private RekognitionClient rekognitionClient;
 
     @Value("${aws.credentials.accessKey}")
@@ -37,9 +36,14 @@ class CollectionFaceSearchServiceTest {
     }
 
     @Test
-    void searchFaceInCollection() {
-        String sourceImage = "C:\\Users\\gram\\Desktop\\face\\src\\main\\resources\\지연.jpg";
+    void test(){
+        String sourceImage = "C:\\Users\\gram\\Desktop\\face\\src\\main\\resources\\김승수.jpg";
 
-        collectionFaceSearchService.searchFaceInCollection(rekognitionClient,"GOSCA_TEST", sourceImage);
+        collectionFaceService.addToCollection(rekognitionClient,"GOSCA_TEST",sourceImage);
+    }
+
+    @Test
+    void listFacesCollection(){
+        collectionFaceService.listFacesCollection(rekognitionClient,"GOSCA_TEST");
     }
 }

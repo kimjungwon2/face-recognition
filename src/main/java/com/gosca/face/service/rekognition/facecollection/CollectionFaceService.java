@@ -7,6 +7,7 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.*;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class CollectionFaceAdditionService {
+public class CollectionFaceService {
 
 
     public void addToCollection(RekognitionClient rekognitionClient, String collectionId, String sourceImage) {
@@ -37,6 +38,11 @@ public class CollectionFaceAdditionService {
             IndexFacesResponse facesResponse = rekognitionClient.indexFaces(facesRequest);
             log.info("Results for the image");
             log.info("\n Faces indexed:");
+
+            if(facesResponse!=null && facesResponse.faceRecords().size()==0){
+                throw new IllegalStateException("얼굴이 인식되지 않았습니다.");
+            }
+
             List<FaceRecord> faceRecords = facesResponse.faceRecords();
             for (FaceRecord faceRecord : faceRecords) {
                 log.info("  Face ID: {}", faceRecord.face().faceId());
@@ -47,7 +53,7 @@ public class CollectionFaceAdditionService {
             log.info("Faces not indexed:");
             for (UnindexedFace unindexedFace : unindexedFaces) {
                 log.info("  Location:{}",unindexedFace.faceDetail().boundingBox().toString());
-                log.info("  Reasons:");
+
                 for (Reason reason : unindexedFace.reasons()) {
                     log.info("Reason:  {}", reason);
                 }
@@ -78,4 +84,36 @@ public class CollectionFaceAdditionService {
             System.exit(1);
         }
     }
+
+
+    public void searchFaceInCollection(RekognitionClient rekognitionClient, String collectionId, String sourceImage) {
+
+        try {
+            InputStream sourceStream = new FileInputStream(new File(sourceImage));
+            SdkBytes sourceBytes = SdkBytes.fromInputStream(sourceStream);
+            Image souImage = Image.builder()
+                    .bytes(sourceBytes)
+                    .build();
+
+            SearchFacesByImageRequest facesByImageRequest = SearchFacesByImageRequest.builder()
+                    .image(souImage)
+                    .maxFaces(10)
+                    .faceMatchThreshold(80F)
+                    .collectionId(collectionId)
+                    .build();
+
+            SearchFacesByImageResponse imageResponse = rekognitionClient.searchFacesByImage(facesByImageRequest);
+            System.out.println("Faces matching in the collection");
+            List<FaceMatch> faceImageMatches = imageResponse.faceMatches();
+            for (FaceMatch face: faceImageMatches) {
+                System.out.println("The similarity level is  "+face.similarity());
+                System.out.println();
+            }
+
+        } catch (RekognitionException | FileNotFoundException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
+    }
+
 }

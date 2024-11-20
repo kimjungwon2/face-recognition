@@ -5,7 +5,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.rekognition.AmazonRekognition;
 import com.amazonaws.services.rekognition.AmazonRekognitionClientBuilder;
-import com.gosca.face.service.rekognition.facecollection.CollectionFaceAdditionService;
+import com.gosca.face.service.rekognition.facecollection.CollectionFaceService;
 import com.gosca.face.service.rekognition.facecollection.CollectionUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 @Service
 public class FaceImageSaveService {
 
-    private final CollectionFaceAdditionService collectionFaceAdditionService;
+    private final CollectionFaceService collectionFaceService;
     private final CollectionUserService collectionUserService;
 
 
