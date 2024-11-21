@@ -1,30 +1,49 @@
 package com.gosca.face.entity;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Getter
+import lombok.*;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
-@DynamoDBTable(tableName = "store_face_collection")
+@Data
+@DynamoDbBean
 public class StoreFaceCollection {
 
-    @DynamoDBHashKey(attributeName = "collection_id")
     private String collectionId;
-
-    @DynamoDBAttribute(attributeName = "store_id")
-    private Integer storeId;
-
-    @DynamoDBAttribute(attributeName = "store_type")
+    private Long storeId;
     private String storeType;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
 
-    @DynamoDBAttribute(attributeName = "created_date")
-    private String createdDate;
 
-    @DynamoDBAttribute(attributeName = "updated_date")
-    private String updatedDate;
+    @Builder
+    public StoreFaceCollection(String collectionId, Long storeId, String storeType, LocalDateTime createdDate, LocalDateTime updatedDate) {
+        this.collectionId = collectionId;
+        this.storeId = storeId;
+        this.storeType = storeType;
+        this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
+    }
 
+    @DynamoDbPartitionKey
+    public String getCollectionId() {
+        return collectionId;
+    }
+
+    @DynamoDbSortKey
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
+
+    public void setCollectionId(String collectionId) {
+        this.collectionId = collectionId;
+    }
 }
