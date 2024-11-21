@@ -35,6 +35,9 @@ dependencies {
     implementation 'software.amazon.awssdk:rekognition:2.20.17'
     implementation 'com.amazonaws:aws-java-sdk-rekognition:1.12.541'
 
+    implementation 'software.amazon.awssdk:dynamodb:2.20.68'
+    implementation 'software.amazon.awssdk:dynamodb-enhanced:2.20.68'
+
     runtimeOnly 'com.mysql:mysql-connector-j'
 
     annotationProcessor 'org.projectlombok:lombok'

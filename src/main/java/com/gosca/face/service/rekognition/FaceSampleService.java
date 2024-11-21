@@ -45,7 +45,7 @@ public class FaceSampleService {
     public void compareTwoFaces(String sourceImage, String targetImage, Float similarityThreshold) {
         try (
                 InputStream sourceStream = getClass().getClassLoader().getResourceAsStream(sourceImage);
-                InputStream targetStream = getClass().getClassLoader().getResourceAsStream(targetImage)
+                InputStream targetStream = getClass().getClassLoader().getResourceAsStream(targetImage);
         ) {
             if (sourceStream == null || targetStream == null) {
                 log.info("One or both image files were not found in the resources folder.");
