@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 
+import java.util.List;
+
 
 @SpringBootTest
 class StoreFaceCollectionRepositoryTest {
@@ -29,16 +31,34 @@ class StoreFaceCollectionRepositoryTest {
 
 
     @Test
+    void findByCollectionId(){
+        StoreFaceCollection storeFaceCollection = repository.findByCollectionIdAndStoreId("gosca_1",1L);
+
+        System.out.println(storeFaceCollection);
+    }
+
+    @Test
     void testSave() {
         // Given
         StoreFaceCollection storeFaceCollection = StoreFaceCollection.builder()
-                .collectionId("gosca_1")
+                .collectionId("gosca_2")
                 .storeType("gosca")
-                .storeId(1L)
+                .storeId(2L)
                 .build();
 
         // When
         repository.save(storeFaceCollection);
+    }
+
+    @Test
+    void findAll(){
+        List<StoreFaceCollection> storeFaceCollectionList = repository.findAll();
+        System.out.println(storeFaceCollectionList);
+    }
+
+    @Test
+    void delete(){
+        repository.delete("gosca_1",1L);
     }
 
 

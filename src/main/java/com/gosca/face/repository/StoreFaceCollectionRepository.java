@@ -26,15 +26,15 @@ public class StoreFaceCollectionRepository {
                 .collectionId(collection.getCollectionId())
                 .storeType(collection.getStoreType())
                 .storeId(collection.getStoreId())
-                .createdDate(collection.getCreatedDate() != null ? collection.getCreatedDate() : LocalDateTime.now())
-                .updatedDate(collection.getCreatedDate() != null ? collection.getCreatedDate() : LocalDateTime.now())
+                .createdDate(collection.getCreatedDate() != null ? collection.getCreatedDate().withNano(0) : LocalDateTime.now().withNano(0))
+                .updatedDate(collection.getCreatedDate() != null ? collection.getCreatedDate().withNano(0) : LocalDateTime.now().withNano(0))
                 .build();
 
         storeFaceCollectionTable.putItem(updatedCollection);
     }
 
-    public StoreFaceCollection findByCollectionId(String collectionId) {
-        return storeFaceCollectionTable.getItem(r -> r.key(k -> k.partitionValue(collectionId)));
+    public StoreFaceCollection findByCollectionIdAndStoreId(String collectionId, Long storeId) {
+        return storeFaceCollectionTable.getItem(r -> r.key(k -> k.partitionValue(collectionId).sortValue(storeId)));
     }
 
     public List<StoreFaceCollection> findAll() {
@@ -44,21 +44,10 @@ public class StoreFaceCollectionRepository {
         return collections;
     }
 
-    public List<StoreFaceCollection> findByStoreType(String storeType) {
-        Iterator<StoreFaceCollection> results = storeFaceCollectionTable.query(
-                r -> r.queryConditional(
-                        QueryConditional.keyEqualTo(k -> k.partitionValue(storeType))
-                )
-        ).items().iterator();
 
-        List<StoreFaceCollection> collections = new ArrayList<>();
-        results.forEachRemaining(collections::add);
-
-        return collections;
-    }
-
-    public void delete(String collectionId) {
-        storeFaceCollectionTable.deleteItem(r -> r.key(k -> k.partitionValue(collectionId)));
+    public void delete(String collectionId, Long storeId) {
+        storeFaceCollectionTable.deleteItem(r -> r.key(k -> k.partitionValue(collectionId)
+                .sortValue(storeId)));
     }
 
 

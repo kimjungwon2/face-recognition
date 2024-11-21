@@ -39,11 +39,4 @@ public class StoreFaceCollection {
         return storeId;
     }
 
-    public void setStoreId(Long storeId) {
-        this.storeId = storeId;
-    }
-
-    public void setCollectionId(String collectionId) {
-        this.collectionId = collectionId;
-    }
 }
