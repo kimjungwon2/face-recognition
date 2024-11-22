@@ -99,7 +99,6 @@ public class FaceImageSaveService {
     }
 
 
-
     public boolean saveTestUserFace(MultipartFile file, String collectionId, Long userId){
         collectionManagementService.createMyCollection(rekognitionClientV2, collectionId);
         String faceId = collectionFaceService.addFaceToCollection(rekognitionClientV2, collectionId, file);

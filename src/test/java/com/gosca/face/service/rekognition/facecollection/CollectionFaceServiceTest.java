@@ -44,7 +44,7 @@ class CollectionFaceServiceTest {
 
     @Test
     void listFacesCollection(){
-        collectionFaceService.listFacesCollection(rekognitionClient,"GOSCA_TEST10");
+        collectionFaceService.listFacesCollection(rekognitionClient,"gosca_1");
     }
 
 }

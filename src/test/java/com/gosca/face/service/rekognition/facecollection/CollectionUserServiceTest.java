@@ -44,7 +44,7 @@ class CollectionUserServiceTest {
 
     @Test
     void getUserLists(){
-        collectionUserService.getUserLists(rekognitionClient,"GOSCA_TEST10");
+        collectionUserService.getUserLists(rekognitionClient,"gosca_1");
     }
 
     @Test

@@ -1,15 +1,10 @@
 package com.gosca.face.service.rekognition.facecollection;
 
+import com.amazonaws.services.rekognition.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.rekognition.AmazonRekognition;
-import com.amazonaws.services.rekognition.model.CreateUserRequest;
-import com.amazonaws.services.rekognition.model.User;
-import com.amazonaws.services.rekognition.model.AssociateFacesRequest;
-import com.amazonaws.services.rekognition.model.AssociateFacesResult;
-import com.amazonaws.services.rekognition.model.ListUsersRequest;
-import com.amazonaws.services.rekognition.model.ListUsersResult;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +15,9 @@ import java.util.List;
 @Service
 public class CollectionUserService {
 
+
     public void createUser(AmazonRekognition rekognitionClient, String collectionId, Long userId) {
+
         CreateUserRequest request = new CreateUserRequest()
                 .withCollectionId(collectionId)
                 .withUserId(String.valueOf(userId));
@@ -61,13 +58,22 @@ public class CollectionUserService {
 
         AssociateFacesResult result = rekognitionClient.associateFaces(request);
 
-        System.out.println("Successful face associations: " + result.getAssociatedFaces().size());
-        System.out.println("Unsuccessful face associations: " + result.getUnsuccessfulFaceAssociations().size());
+        log.info("Successful face associations: {}", result.getAssociatedFaces().size());
+        log.info("Unsuccessful face associations: {}", result.getUnsuccessfulFaceAssociations().size());
 
         if(result.getUnsuccessfulFaceAssociations().size()>=1) {
             log.error("result:{}", result);
+            deleteUser(rekognitionClient, collectionId, userId);
             throw new IllegalStateException("유저와 얼굴 연계가 안 됐습니다.");
         }
+    }
+
+    public void deleteUser(AmazonRekognition rekognitionClient, String collectionId, String userId){
+        DeleteUserRequest request = new DeleteUserRequest()
+                .withCollectionId(collectionId)
+                .withUserId(userId);
+
+        rekognitionClient.deleteUser(request);
     }
 
 }
