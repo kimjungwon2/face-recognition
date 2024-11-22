@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ public class StoreFaceCollectionRepository {
     private final DynamoDbTable<StoreFaceCollection> storeFaceCollectionTable;
 
     public StoreFaceCollectionRepository(DynamoDbEnhancedClient dynamoDbEnhancedClient) {
-        this.storeFaceCollectionTable = dynamoDbEnhancedClient.table("store_face_collection", TableSchema.fromBean(StoreFaceCollection.class));;
+        this.storeFaceCollectionTable = dynamoDbEnhancedClient.table("store_face_collection", TableSchema.fromBean(StoreFaceCollection.class));
     }
 
     public void save(StoreFaceCollection collection) {

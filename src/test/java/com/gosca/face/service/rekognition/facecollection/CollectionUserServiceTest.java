@@ -39,7 +39,7 @@ class CollectionUserServiceTest {
 
     @Test
     void test(){
-        collectionUserService.createUser(rekognitionClient,"GOSCA_TEST10","1");
+        collectionUserService.createUser(rekognitionClient,"GOSCA_TEST10",1L);
     }
 
     @Test

@@ -20,10 +20,10 @@ import java.util.List;
 @Service
 public class CollectionUserService {
 
-    public void createUser(AmazonRekognition rekognitionClient, String collectionId, String userId) {
+    public void createUser(AmazonRekognition rekognitionClient, String collectionId, Long userId) {
         CreateUserRequest request = new CreateUserRequest()
                 .withCollectionId(collectionId)
-                .withUserId(userId);
+                .withUserId(String.valueOf(userId));
 
         rekognitionClient.createUser(request);
     }

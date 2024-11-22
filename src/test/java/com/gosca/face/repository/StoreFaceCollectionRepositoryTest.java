@@ -20,11 +20,6 @@ import java.util.List;
 
 @SpringBootTest
 class StoreFaceCollectionRepositoryTest {
-    @Mock
-    private DynamoDbEnhancedClient dynamoDbEnhancedClient;
-
-    @Mock
-    private DynamoDbTable<StoreFaceCollection> storeFaceCollectionTable;
 
     @Autowired
     private StoreFaceCollectionRepository repository;
