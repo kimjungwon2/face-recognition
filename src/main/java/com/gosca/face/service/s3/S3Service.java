@@ -38,13 +38,13 @@ public class S3Service {
     }
 
 
-    public String uploadFileToS3(MultipartFile file) {
-        String keyName = "uploads/" + file.getOriginalFilename();
+    public String uploadFileToS3(MultipartFile file, String storeType, Long storeId) {
+        String path = generateS3Path(file.getOriginalFilename(), storeType, storeId);
 
         try {
             byte[] bytes = file.getBytes();
-            uploadFile(bytes, bucketName, keyName);
-            return "File uploaded successfully: " + keyName;
+            uploadFile(bytes, bucketName, path);
+            return "File uploaded successfully: " + path;
         } catch (Exception e) {
             e.printStackTrace();
             return "File upload failed: " + e.getMessage();
@@ -58,5 +58,19 @@ public class S3Service {
                 .build();
 
         s3Client.putObject(putObjectRequest, RequestBody.fromBytes(bytes));
+    }
+
+    private String generateS3Path(String fileName, String storeType, Long storeId){
+        StringBuilder path = new StringBuilder();
+
+        path.append(storeType);
+        path.append("/");
+        path.append(storeId);
+        path.append("/");
+        path.append(fileName);
+
+        log.info("S3 PATH:{}", path.toString());
+
+        return path.toString();
     }
 }
