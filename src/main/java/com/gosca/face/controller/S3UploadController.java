@@ -46,24 +46,17 @@ public class S3UploadController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
             @RequestParam("file") MultipartFile file,
-            @RequestBody @Validated FaceSaveRequestDto request
+            @ModelAttribute @Validated FaceSaveRequestDto request
     ) {
-        try {
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body("파일이 비어있습니다.");
-            }
+       if (file.isEmpty()) {
+           return ResponseEntity.badRequest().body("파일이 비어있습니다.");
+       }
 
-            log.info("파일 업로드 시작: {}", file.getOriginalFilename());
+       log.info("파일 업로드 시작: {}", file.getOriginalFilename());
 
-            faceImageSaveService.saveUserFace(file, request);
+       faceImageSaveService.saveUserFace(file, request);
 
-            return ResponseEntity.ok("저장 완료");
-
-        } catch (Exception e) {
-            log.error("파일 업로드 실패", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("파일 업로드 중 오류가 발생했습니다: " + e.getMessage());
-        }
+       return ResponseEntity.ok("저장 완료");
     }
 
 }

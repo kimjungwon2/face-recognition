@@ -24,6 +24,7 @@ public class StoreUserFaceCollectionRepository {
                 .collectionId(collection.getCollectionId())
                 .userId(collection.getUserId())
                 .storeId(collection.getStoreId())
+                .faceId(collection.getFaceId())
                 .createdDate(collection.getCreatedDate() != null ? collection.getCreatedDate().withNano(0) : LocalDateTime.now().withNano(0))
                 .updatedDate(collection.getCreatedDate() != null ? collection.getCreatedDate().withNano(0) : LocalDateTime.now().withNano(0))
                 .build();

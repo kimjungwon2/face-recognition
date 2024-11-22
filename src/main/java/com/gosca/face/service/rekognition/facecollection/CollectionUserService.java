@@ -51,7 +51,7 @@ public class CollectionUserService {
 
     public void associateFace(AmazonRekognition rekognitionClient, String collectionId, String faceId, String userId){
 
-        System.out.println("Associating faces to the existing user: " + userId);
+        System.out.println("Associating faces to the existing userId: " + userId);
         List<String> faceIds = Arrays.asList(faceId);
 
         AssociateFacesRequest request = new AssociateFacesRequest()
@@ -63,6 +63,11 @@ public class CollectionUserService {
 
         System.out.println("Successful face associations: " + result.getAssociatedFaces().size());
         System.out.println("Unsuccessful face associations: " + result.getUnsuccessfulFaceAssociations().size());
+
+        if(result.getUnsuccessfulFaceAssociations().size()>=1) {
+            log.error("result:{}", result);
+            throw new IllegalStateException("유저와 얼굴 연계가 안 됐습니다.");
+        }
     }
 
 }
