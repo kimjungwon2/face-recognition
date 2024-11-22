@@ -7,6 +7,7 @@ import com.amazonaws.services.rekognition.AmazonRekognition;
 import com.amazonaws.services.rekognition.AmazonRekognitionClientBuilder;
 import com.gosca.face.controller.dto.FaceSaveRequestDto;
 import com.gosca.face.service.dynamo.StoreFaceCollectionService;
+import com.gosca.face.service.dynamo.StoreUserFaceCollectionService;
 import com.gosca.face.service.name.NameGeneratorService;
 import com.gosca.face.service.rekognition.facecollection.CollectionFaceService;
 import com.gosca.face.service.rekognition.facecollection.CollectionManagementService;
@@ -35,6 +36,7 @@ public class FaceImageSaveService {
     private final S3Service s3Service;
     private final StoreFaceCollectionService storeFaceCollectionService;
     private final NameGeneratorService nameGeneratorService;
+    private final StoreUserFaceCollectionService storeUserFaceCollectionService;
 
     private RekognitionClient rekognitionClientV2;
     private AmazonRekognition rekognitionClientV1;
@@ -77,6 +79,8 @@ public class FaceImageSaveService {
             storeFaceCollectionService.saveFaceCollection(collectionId, storeType, storeId);
         }
 
+        storeUserFaceCollectionService.checkUserIdAndCollectionId(userId, collectionId);
+
         //비동기 처리해야 한다.(중요)
         String faceId = collectionFaceService.addFaceToCollection(rekognitionClientV2, collectionId, file);
 
@@ -84,11 +88,12 @@ public class FaceImageSaveService {
         collectionUserService.associateFace(rekognitionClientV1, collectionId, faceId, String.valueOf(userId));
 
         s3Service.uploadFileToS3(file);
-
         rekognitionClientV2.close();
 
+        storeFaceCollectionService.saveFaceCollection(collectionId, storeType, storeId);
         String userFaceCollectionKey = nameGeneratorService.generateUserFaceCollectionKey(collectionId, userId);
 
+        storeUserFaceCollectionService.saveStoreUserFaceCollection(userFaceCollectionKey, collectionId, faceId, userId, storeId);
 
         return true;
     }

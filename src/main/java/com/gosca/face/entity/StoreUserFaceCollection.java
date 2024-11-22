@@ -18,15 +18,18 @@ public class StoreUserFaceCollection {
     private String collectionId;
     private Long storeId;
     private Long userId;
+    private String faceId;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 
+
     @Builder
-    public StoreUserFaceCollection(String userFaceCollectionKey, String collectionId, Long storeId, Long userId, LocalDateTime createdDate, LocalDateTime updatedDate) {
+    public StoreUserFaceCollection(String userFaceCollectionKey, String collectionId, Long storeId, Long userId, String faceId, LocalDateTime createdDate, LocalDateTime updatedDate) {
         this.userFaceCollectionKey = userFaceCollectionKey;
         this.collectionId = collectionId;
         this.storeId = storeId;
         this.userId = userId;
+        this.faceId = faceId;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
     }
