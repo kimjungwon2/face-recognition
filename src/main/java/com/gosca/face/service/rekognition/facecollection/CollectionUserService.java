@@ -17,12 +17,22 @@ public class CollectionUserService {
 
 
     public void createUser(AmazonRekognition rekognitionClient, String collectionId, Long userId) {
+        try {
+            log.info("collectionId:{}, userId:{}", collectionId, userId);
 
-        CreateUserRequest request = new CreateUserRequest()
-                .withCollectionId(collectionId)
-                .withUserId(String.valueOf(userId));
+            CreateUserRequest request = new CreateUserRequest()
+                    .withCollectionId(collectionId)
+                    .withUserId(String.valueOf(userId));
+            rekognitionClient.createUser(request);
 
-        rekognitionClient.createUser(request);
+        }catch (AmazonRekognitionException e) {
+            log.error("Amazon Rekognition 요청 실패: {}", e.getMessage());
+            if (e.getStatusCode()==400) {
+                throw new IllegalArgumentException(e.getErrorCode(), e);
+            } else {
+                throw new RuntimeException(e.getErrorCode(), e);
+            }
+        }
     }
 
     public void getUserLists(AmazonRekognition rekognitionClient, String collectionId){
