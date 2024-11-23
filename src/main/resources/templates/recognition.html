@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>웹캠 스트리밍 & 캡처</title>
+    <title>웹캠 얼굴 인식</title>
     <meta charset="UTF-8">
     <style>
         .container {
@@ -68,13 +68,11 @@
             border: 1px solid #c3e6cb;
         }
 
-        #capturedImage {
-            max-width: 320px;
+        #resultContainer {
             margin-top: 20px;
-            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #f0f0f0;
             border-radius: 4px;
-            display: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .error-container {
@@ -89,7 +87,7 @@
 </head>
 <body>
 <div class="container">
-    <h1>웹캠 스트리밍 & 캡처</h1>
+    <h1>웹캠 얼굴 인식</h1>
 
     <div class="error-container" id="errorContainer">
         <h3>웹캠 접근 오류</h3>
@@ -101,10 +99,6 @@
     </div>
 
     <div>
-        <label for="userId">User ID:</label>
-        <input type="number" id="userId" name="userId" required>
-    </div>
-    <div>
         <label for="storeId">Store ID:</label>
         <input type="number" id="storeId" name="storeId" required>
     </div>
@@ -113,31 +107,31 @@
         <input type="text" id="storeType" name="storeType" required>
     </div>
 
-    <button id="captureButton" disabled>캡처</button>
+    <button id="captureButton" disabled>인식</button>
     <button id="retryButton" style="display: none" onclick="retryWebcam()">다시 시도</button>
     <p id="status"></p>
 
-    <img id="capturedImage" alt="캡처된 이미지">
+    <div id="resultContainer" style="display: none;">
+        <h3>인식 결과:</h3>
+        <p id="resultUserId"></p>
+    </div>
 </div>
 
 <script th:inline="javascript">
     let videoElement = document.getElementById('videoElement');
     let captureButton = document.getElementById('captureButton');
     let statusElement = document.getElementById('status');
-    let capturedImage = document.getElementById('capturedImage');
     let errorContainer = document.getElementById('errorContainer');
     let errorMessage = document.getElementById('errorMessage');
     let retryButton = document.getElementById('retryButton');
     let stream = null;
 
-    // 브라우저 호환성 체크
     function checkBrowserCompatibility() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error('이 브라우저는 웹캠을 지원하지 않습니다. 최신 브라우저를 사용해주세요.');
         }
     }
 
-    // 웹캠 디바이스 체크
     async function checkWebcamDevices() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
@@ -147,17 +141,15 @@
         return videoDevices;
     }
 
-    // 웹캠 스트리밍 시작
     async function startWebcam() {
         try {
             checkBrowserCompatibility();
 
-            // 모바일 여부 체크
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
             const constraints = {
                 video: {
-                    facingMode: isMobile ? "environment" : "user", // 모바일이면 후면카메라, 아니면 전면카메라
+                    facingMode: isMobile ? "environment" : "user",
                     width: { ideal: 1280 },
                     height: { ideal: 720 }
                 }
@@ -167,14 +159,12 @@
             stream = await navigator.mediaDevices.getUserMedia(constraints);
             console.log('카메라 스트림 획득:', stream);
 
-            // 스트림 정보 확인
             const videoTrack = stream.getVideoTracks()[0];
             console.log('비디오 트랙 설정:', videoTrack.getSettings());
 
             videoElement.srcObject = stream;
-            videoElement.setAttribute('playsinline', true); // iOS 필수
+            videoElement.setAttribute('playsinline', true);
 
-            // 비디오 이벤트 리스너 추가
             videoElement.onloadedmetadata = () => {
                 console.log('비디오 메타데이터 로드됨');
                 videoElement.play()
@@ -202,7 +192,6 @@
         }
     }
 
-    // 에러 처리
     function handleWebcamError(error) {
         let message = '웹캠 접근 실패: ';
 
@@ -230,13 +219,11 @@
         captureButton.disabled = true;
     }
 
-    // 상태 업데이트
     function updateStatus(message, type = '') {
         statusElement.textContent = message;
         statusElement.className = type ? type : '';
     }
 
-    // 웹캠 재시도
     function retryWebcam() {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -249,13 +236,11 @@
             console.log('캡처 시작...');
             const canvas = document.createElement('canvas');
 
-            // 비디오 현재 크기 가져오기
             const videoWidth = videoElement.videoWidth || videoElement.clientWidth;
             const videoHeight = videoElement.videoHeight || videoElement.clientHeight;
 
             console.log('비디오 크기:', videoWidth, 'x', videoHeight);
 
-            // 캔버스 크기 설정
             canvas.width = videoWidth;
             canvas.height = videoHeight;
 
@@ -266,37 +251,27 @@
                 console.log('이미지 블롭 생성:', blob.size, 'bytes');
 
                 const formData = new FormData();
+                formData.append('file', blob, 'capture.jpg');
 
-                // 추가 필드 값 가져오기
-                const userId = document.getElementById('userId').value;
                 const storeId = document.getElementById('storeId').value;
                 const storeType = document.getElementById('storeType').value;
 
-                formData.append('file', blob, `${userId}.jpg`);
-                // 추가 필드를 FormData에 추가
-                formData.append('userId', userId);
                 formData.append('storeId', storeId);
                 formData.append('storeType', storeType);
 
-                fetch('/api/files/upload', {  // 업로드 엔드포인트 경로 수정
+                fetch('/api/files/face/recognition', {
                     method: 'POST',
                     body: formData
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('서버 응답 오류: ' + response.status);
-                        }
-                        return response.text();
-                    })
-                    .then(result => {
-                        console.log('업로드 성공:', result);
-                        updateStatus('캡처 성공: ' + result, 'success');
-                        capturedImage.src = URL.createObjectURL(blob);
-                        capturedImage.style.display = 'block';
+                    .then(response => response.text())
+                    .then(userId => {
+                        console.log('인식 결과:', userId);
+                        document.getElementById('resultUserId').textContent = userId;
+                        document.getElementById('resultContainer').style.display = 'block';
                     })
                     .catch(error => {
-                        console.error('업로드 실패:', error);
-                        updateStatus('캡처 실패: ' + error.message, 'error');
+                        console.error('인식 실패:', error);
+                        updateStatus('인식 실패: ' + error.message, 'error');
                     });
             }, 'image/jpeg', 0.8);
 
@@ -306,10 +281,8 @@
         }
     });
 
-    // 페이지 로드 시 웹캠 시작
     document.addEventListener('DOMContentLoaded', startWebcam);
 
-    // 페이지 언로드 시 웹캠 정리
     window.addEventListener('beforeunload', function() {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
