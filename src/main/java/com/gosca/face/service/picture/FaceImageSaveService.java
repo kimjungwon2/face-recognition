@@ -24,6 +24,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 
 import javax.annotation.PostConstruct;
+import java.util.Locale;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -68,7 +69,7 @@ public class FaceImageSaveService {
     public boolean saveUserFace(MultipartFile file, FaceSaveRequestDto request){
         Long userId = request.getUserId();
         Long storeId = request.getStoreId();
-        String storeType = request.getStoreType();
+        String storeType = convertToUpperCase(request.getStoreType());
 
         String collectionId = nameGeneratorService.generateFaceCollectionId(storeType, storeId);
 
@@ -87,7 +88,7 @@ public class FaceImageSaveService {
         collectionUserService.createUser(rekognitionClientV1, collectionId, userId);
         collectionUserService.associateFace(rekognitionClientV1, collectionId, faceId, String.valueOf(userId));
 
-        s3Service.uploadFileToS3(file);
+        s3Service.uploadFileToS3(file, storeType, storeId);
         rekognitionClientV2.close();
 
         storeFaceCollectionService.saveFaceCollection(collectionId, storeType, storeId);
@@ -106,11 +107,18 @@ public class FaceImageSaveService {
         collectionUserService.createUser(rekognitionClientV1, collectionId, userId);
         collectionUserService.associateFace(rekognitionClientV1, collectionId, faceId, String.valueOf(userId));
 
-        s3Service.uploadFileToS3(file);
+        s3Service.uploadFileToS3(file,"uploads",1L);
 
         rekognitionClientV2.close();
 
         return true;
+    }
+
+    private String convertToUpperCase(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        return input.toUpperCase(Locale.KOREAN);
     }
 
 }
