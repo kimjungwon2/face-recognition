@@ -18,20 +18,14 @@ public class WebcamController {
         this.webcamService = webcamService;
     }
 
-    @GetMapping
+    @GetMapping("/save")
     public String webcamPage() {
         return "webcam";
     }
 
-    @PostMapping("/capture")
-    @ResponseBody
-    public ResponseEntity<String> saveCapture(@RequestParam("image") String base64Image) {
-        try {
-            String filename = webcamService.saveCapture(base64Image);
-            return ResponseEntity.ok(filename);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("이미지 저장 실패: " + e.getMessage());
-        }
+    @GetMapping("/recognition")
+    public String faceRecognitionPage() {
+        return "recognition";
     }
+
 }
