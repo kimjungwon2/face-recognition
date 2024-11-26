@@ -283,14 +283,20 @@
                     body: formData
                 })
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error('서버 응답 오류: ' + response.status);
-                        }
-                        return response.text();
+                        return response.json().then(data => {
+                            if (!response.ok) {
+                                // 400 에러일 때
+                                if (response.status === 400 || response.status === 500) {
+                                    alert(data.message);  // ApiResponse의 message 필드
+                                }
+                                throw new Error(data.message || '서버 응답 오류: ' + response.status);
+                            }
+                            return data;
+                        });
                     })
                     .then(result => {
                         console.log('업로드 성공:', result);
-                        updateStatus('캡처 성공: ' + result, 'success');
+                        updateStatus('캡처 성공: ' + result.message, 'success');
                         capturedImage.src = URL.createObjectURL(blob);
                         capturedImage.style.display = 'block';
                     })
