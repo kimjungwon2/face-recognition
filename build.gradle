@@ -54,3 +54,7 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks.withType(Test).configureEach {
+    onlyIf { !gradle.startParameter.taskNames.contains("build") }
+}
