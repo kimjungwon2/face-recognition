@@ -32,8 +32,7 @@ dependencies {
     implementation 'com.amazonaws:aws-java-sdk-rekognition:1.12.621'
     implementation 'software.amazon.awssdk:s3:2.20.4'
     compileOnly 'org.projectlombok:lombok'
-    implementation 'software.amazon.awssdk:rekognition:2.20.17'
-    implementation 'com.amazonaws:aws-java-sdk-rekognition:1.12.541'
+    implementation 'software.amazon.awssdk:rekognition:2.27.24'
 
     implementation 'com.amazonaws:aws-java-sdk-dynamodb:1.12.568'
     implementation 'software.amazon.awssdk:dynamodb:2.20.68'
