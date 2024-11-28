@@ -276,11 +276,8 @@
                     })
                     .then(result => {
                         console.log('인식 결과:', result);
-                        if (result.data) {
-                            document.getElementById('resultUserId').textContent = result.data;
-                        } else {
-                            document.getElementById('resultUserId').textContent = result.message;
-                        }
+
+                        document.getElementById('resultUserId').textContent = result;
                         document.getElementById('resultContainer').style.display = 'block';
                         updateStatus('인식 성공', 'success');
                     })

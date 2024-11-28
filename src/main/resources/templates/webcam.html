@@ -283,22 +283,33 @@
                     body: formData
                 })
                     .then(response => {
-                        return response.json().then(data => {
-                            if (!response.ok) {
-                                // 400 에러일 때
-                                if (response.status === 400 || response.status === 500) {
-                                    alert(data.message);  // ApiResponse의 message 필드
+                        const contentType = response.headers.get("content-type");
+                        if (contentType && contentType.includes("application/json")) {
+                            return response.json().then(data => {
+                                if (!response.ok) {
+                                    if (response.status === 400 || response.status === 500) {
+                                        alert(data.message);
+                                    }
+                                    throw new Error(data.message || '서버 응답 오류: ' + response.status);
                                 }
-                                throw new Error(data.message || '서버 응답 오류: ' + response.status);
-                            }
-                            return data;
-                        });
+                                return data;
+                            });
+                        } else {
+                            return response.text().then(text => {
+                                if (!response.ok) {
+                                    throw new Error(text || '서버 응답 오류: ' + response.status);
+                                }
+                                return text;
+                            });
+                        }
                     })
                     .then(result => {
                         console.log('업로드 성공:', result);
-                        updateStatus('캡처 성공: ' + result.message, 'success');
+                        updateStatus('캡처 성공: ' + result, 'success');
                         capturedImage.src = URL.createObjectURL(blob);
                         capturedImage.style.display = 'block';
+
+                        window.location.href = '/webcam/success';
                     })
                     .catch(error => {
                         console.error('업로드 실패:', error);
